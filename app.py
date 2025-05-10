@@ -1,9 +1,17 @@
 import streamlit as st
-import pickle
+import joblib
 
+# Set up Streamlit page
 st.set_page_config(page_title="🎬 IMDB Sentiment Analyzer", page_icon="🎥", layout="centered")
 
-# Custom CSS for clean UI
+# Load model
+@st.cache_resource
+def load_model():
+    return joblib.load("sentiment_model.joblib")
+
+model = load_model()
+
+# Custom UI
 st.markdown("""
     <style>
         .main {
@@ -20,24 +28,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Title
 st.markdown("<h1 style='text-align: center;'>🎬 IMDB Sentiment Analyzer</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>Enter a movie review below to predict the sentiment.</p>", unsafe_allow_html=True)
 
-# Load model
-@st.cache_resource
-def load_model():
-    with open("sentiment_model.pkl", "rb") as f:
-        return pickle.load(f)
-
-model = load_model()
-
-# Text input
+# Input text
 review = st.text_area("Your Review", placeholder="Type or paste a movie review here...", height=200)
 
-# Prediction button
+# Analyze button
 if st.button("Analyze Sentiment"):
-    if review.strip() == "":
+    if not review.strip():
         st.warning("Please enter a review.")
     else:
         prediction = model.predict([review])[0]
